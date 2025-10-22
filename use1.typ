@@ -132,11 +132,70 @@ $ sum _(a in cal(A)) pi(a|s) sum _(s' in cal(S))p(s'|s,a) v_pi (s') =  sum _(s' 
 And we notation $p(p'|s,pi)$ as 
 $ p(s'|s,pi)) equiv p_pi (s'|s) $
 
-so the bellman equation can be rewritten as:
+so the second part of bellman equation can be rewritten as:
 
 $ sum _(s' in cal(S)) p(s'|s,pi) v_pi (s')=sum _(s' in cal(S))p_pi (s'|s) v_pi (s') $
 
+The bellman equation can be rewritten as:
+
+$ v_pi(s) &= sum _(a in cal(A)) pi(a|s)[sum_(r in cal(R)_(s))p(r|s,a)r+gamma sum _(s' in cal(S))p(s'|s,a) v_pi (s')] \ 
+&= r_pi (s)+ sum _(s' in cal(S))p_pi (s'|s) v_pi (s') 
+$
+
+For all $s in cal(S)$ , we notation $s$ as $s_i$
+
+$ v_pi (s_i) &= r_pi (s_i) + gamma sum _(s' in cal(S))p_pi (s'|s_i) v_pi (s') \ 
+&= r_pi (s_i) + gamma sum _(j)^n p_pi (s_j|s_i) v_pi (s_j)  
+ $<1.15>
+
+ where n is the number of states in $cal(S)$ . Then ,we define some vector notation:
+ $ v_pi&=[v_pi (s_1),v_pi (s_2),...,v_pi (s_n)]^T\ 
+r_pi&=[r_pi (s_1),r_pi (s_2),...,r_pi (s_n)]^T 
+  \ P_pi [i,j]&=p_pi (s_j|s_i) quad {P_pi [i,j]>0,sum(P_pi [i,:])=1}
+  $
+
+simply @eqt:1.15 in matrix-vector form:
+
+$ v_pi (s_i) &= r_pi (s_i) + gamma P_pi[i,:] v_pi \ 
+$
+
+Take $n=1,2,3 ... n$ as example 
+
+$  
+  v_pi (s_1) &= r_pi (s_1) + gamma P_pi[1,:] v_pi \
+  v_pi (s_2) &= r_pi (s_2) + gamma P_pi[2,:] v_pi \
+  ...
+  \
+  v_pi (s_n) &= r_pi (s_n) + gamma P_pi[n,:] v_pi \
+
+$
+
+ Obviously, we can rewrite above equations in matrix-vector form:
+
+$ v_pi =r_pi + gamma P_pi v_pi $
+
+// And For example 2.6 , we can write down $r_pi$ and $P_pi$ as:
+// $ r_pi=[-0.5,1,1,1]^T $
+// $ P_pi = mat(
+// 0 , 0.2 , 0.1 ;
+// 0 , 0.4 , 0.3 ;
+// 0 , 0.5 , 0.3 ;
+// 0 , 0.2 , 0.7
+// ; ) $
+// 
+== Solving state values from the Bellman equation
+=== close form solution
+not  applicable in practice because it involves a matrix inversion operation, which still needs  to be calculated by other numerical algorithms
+$ v_pi=(I-gamma P_pi)^(-1) r_pi $
 // “subsequent” 的中文是 “随后的；后来的；接着发生的”。
+=== Iterative solution
+In fact, we can directly solve the Bellman  equation using the following iterative algorithm
+$ v_(k+1)=r_pi + gamma P_pi v_k $
+where $v_0$ is a initial guess of $v_pi$，and when $k->oo$，$v_k$ will converge to $v_pi$.
+#v(0.5em)
+Proof is below : 
+
+== From state value to action value 
 #pagebreak()
 // == environment
 #bibliography(("RL.bib"), title: [
