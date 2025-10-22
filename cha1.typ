@@ -24,26 +24,6 @@
 // Tools
 #import "@preview/dashy-todo:0.1.1": todo
 #import "@preview/cetz:0.4.2" // 绘图
-
-#set page(columns: 1)
-
-// = 目录
-// #outline(title: none)
-// -----------------------------
-#set page(columns: 1)
-#show: article
-
-#maketitle(
-  title: "The Note of  Reinforcement Learning",
-  authors: ("Aoxiang","xuyuan"),
-  date: "Oct 2025",
-)
-#set text(font:("New Computer Modern","Source Han Serif SC"), size: 10pt) // 设置中英语文字体 小四宋体 英语新罗马 
-#let 行间距转换(正文字体,行间距) = ((行间距)/(正文字体)-0.75)*1em
-#set par(leading: 行间距转换(13,23),justify: true,first-line-indent: 2em)
-#import "@preview/indenta:0.0.3": fix-indent
-#show: fix-indent() // 修复第一段的问题
-#show heading: it =>  {it;par()[#let level=(-0.3em,0.2em,0.2em);#for i in (1, 2, 3) {if it.level==i{v(level.at(int(i)-1))}};#text()[#h(0.0em)];#v(-1em);]} // 修复标题下首行 以及微调标题间距
 =  Bellman equation
 == basic concept
 The agent in time $t$ is in state $S_t$ , takes action $A_t$ , receives reward $R_(t+1)$ , the next state is $S_(t+1)$, it can be represented as a state-action-reward trajectory:
@@ -234,26 +214,24 @@ Use $q_pi$ to replace $v_pi (s')$ in @eqt:1.29, we have:
 $
   v_pi (s') & = sum_(a' in cal(A)) q_pi (s',a') pi(a'|s') \ 
   q_pi (s,a)&=sum_(r in cal(R)_(s))p(r|s,a)r+gamma sum _(s' in cal(S))p(s'|s,a) sum_(a' in cal(A)) pi(a'|s') q_pi (s',a') \
-  &=r_pi (s,a)+gamma  sum _k ^("len"(cal(S))) p(s_k|s,a) sum _l ^("len"(cal(A))) pi (a_l|s_k) q_pi (s_k,a_l) 
-  \ &=r_pi (s,a) + gamma sum _k ^("len"(cal(S))) sum _l ^("len"(cal(A))) p_pi (s_k|s,a) pi (a_l|s_k) q_pi (s_k,a_l) \ 
+  &=sum_(r in cal(R)_(s))p(r|s,a)r+gamma  sum _k ^("len"(cal(S))) p(s_k|s,a) sum _l ^("len"(cal(A))) pi (a_l|s_k) q_pi (s_k,a_l) 
+  \ &=sum_(r in cal(R)_(s))p(r|s,a)r + gamma sum _k ^("len"(cal(S))) sum _l ^("len"(cal(A))) p_pi (s_k|s,a) pi (a_l|s_k) q_pi (s_k,a_l) \ 
 $
 
 And like state value , we can also rewrite the equation by matrix-vector form:
 ($i=1,2,...,"len"(cal(S)),j=1,2,...,"len"(cal(A))$)
-$ q_pi (s_i,a_j)&=r_pi (s_i,a_j)  + gamma sum _k ^("len"(cal(S))) sum _l ^("len"(cal(A))) p_pi (s_k|s_i,a_j) pi (a_l|s_k) q_pi (s_k,a_l)
+$ q_pi (s_i,a_j)&=sum_(r in cal(R)_(s))p(r|s,a)r  + gamma sum _k ^("len"(cal(S))) sum _l ^("len"(cal(A))) p_pi (s_k|s_i,a_j) pi (a_l|s_k) q_pi (s_k,a_l)
 $ 
 
-Notation  some useful notation
-$  P[i,k]&=p_pi (s_k|s_i,a_j) \ 
-[k,l]&=pi (a_l|s_k)q_pi (s_k,a_l) \
-$
-So the action value equation can be rewritten as:
-$  q_pi (s_i ,a_j) = r_pi (s_i,a_j) + gamma sum _k ^("len"(cal(S)))sum _l ^("len"(cal(A))) P[i,k] Q[k,l] $
+Notation  some useful notation:
+1. Notation $q_pi$ as a $|cal(A)||cal(S)| times 1$ vector , and it can be accessed via the pair $(i, j)$, where $i = 1, 2, ..., |cal(A)|,j = 1, 2, ..., |cal(S)|$ 
+2. $P Pi$ ia a $|cal(A)||cal(S)| times |cal(A)||cal(S)|$ matrix, where the element at row pair $(i, j)$ and column pair $(k, l)$ is defined as:
+$ p_pi (s_k|s_i,a_j) pi (a_l|s_k) $ 
+3. $tilde(r)$ is the immediate reward vector indexed by the state-action  pairs$(a,s)$,is also a $|cal(A)||cal(S)| times 1$ vector. And the element at row pair $(i, j)$ is defined as:
+$ sum_(r in cal(R)_(s))p(r|s,a)r $
 
+So we have 
 
-#pagebreak()
-// == environment
-#bibliography(("RL.bib"), title: [
-参考文献#v(1em)
-],style: "nature")
- 
+$ q_pi [(i,j),1]&=tilde(r) [(i,j),1]+ gamma P Pi [(i,j),:]q_pi \
+q_pi&=tilde(r)+gamma P Pi q_pi 
+ $
