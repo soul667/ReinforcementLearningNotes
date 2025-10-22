@@ -190,12 +190,67 @@ $ v_pi=(I-gamma P_pi)^(-1) r_pi $
 // “subsequent” 的中文是 “随后的；后来的；接着发生的”。
 === Iterative solution
 In fact, we can directly solve the Bellman  equation using the following iterative algorithm
-$ v_(k+1)=r_pi + gamma P_pi v_k $
+$ v_(k+1)=r_pi + gamma P_pi v_k $<1.21>
 where $v_0$ is a initial guess of $v_pi$，and when $k->oo$，$v_k$ will converge to $v_pi$.
 #v(0.5em)
 Proof is below : 
+#v(0.3em)
+First define $delta_k=v_k-v_pi$, we need to prove when $k -> oo ,delta_k -> 0$
+
+$ v_k = v_pi+ delta_k  quad v_(k+1) = v_pi+delta_(k+1) quad ...  $<1.22>
+
+Take @eqt:1.22 into @eqt:1.21 , we have:
+$ v_pi + delta_(k+1) &= r_pi + gamma P_pi (v_pi + delta_k)
+$
+Then simply the notation of $delta_(k+1)$ and $delta_k$:
+$ delta_(k+1) &= r_pi + gamma P_pi delta_k + gamma P_pi v_pi - v_pi  $<1.24>
+
+Use @eqt:1.24 $v_pi =r_pi + gamma P_pi v_pi$ , we have:
+$ delta_(k+1)=gamma P_pi delta_k =gamma^(k)P_pi delta_0 $
+
+Since $gamma in (0,1)$,when $k -> oo ,gamma^k -> 0,delta_(k+1)->0$ .
+
 
 == From state value to action value 
+Finish the state value $v_pi(s)$ , we can easily get the action value $q_pi (s,a)$ which means the agent expected reward when agent in state $s$ and take action $a$:
+$ q_pi (s,a) &equiv EE[G_t|S_t=s,A_t=a] \ & equiv EE[G_t|s,a] $
+
+And use condition expectation, we have:
+$ v_pi (s) = EE[G_t|s] & = sum_(a in cal(A)) EE[G_t|s,a] pi(a|s) \ 
+&=sum_(a in cal(A)) q_pi (s,a) pi(a|s)
+ $<1.27>
+
+ Then $v_pi (s)$ can be represented by $q_pi (s,a)$ .
+ $ v_pi (s)&=sum _(a in cal(A)) pi(a|s)[sum_(r in cal(R)_(s))p(r|s,a)r+gamma sum _(s' in cal(S))p(s'|s,a) v_pi (s')] \ 
+ &= mark(sum _(a in cal(A)) pi(a|s) q_pi (s,a),tag: #<5>,color: #black) 
+  $
+ #annot(<5>, dx: 8em ,dy:-1.5em )[@eqt:1.27]
+
+So we can notation $q_pi (s,a)$ as:
+$ q_pi (s,a)=sum_(r in cal(R)_(s))p(r|s,a)r+gamma sum _(s' in cal(S))p(s'|s,a) v_pi (s') $<1.29>
+
+Use $q_pi$ to replace $v_pi (s')$ in @eqt:1.29, we have:
+
+$
+  v_pi (s') & = sum_(a' in cal(A)) q_pi (s',a') pi(a'|s') \ 
+  q_pi (s,a)&=sum_(r in cal(R)_(s))p(r|s,a)r+gamma sum _(s' in cal(S))p(s'|s,a) sum_(a' in cal(A)) pi(a'|s') q_pi (s',a') \
+  &=r_pi (s,a)+gamma  sum _k ^("len"(cal(S))) p(s_k|s,a) sum _l ^("len"(cal(A))) pi (a_l|s_k) q_pi (s_k,a_l) 
+  \ &=r_pi (s,a) + gamma sum _k ^("len"(cal(S))) sum _l ^("len"(cal(A))) p_pi (s_k|s,a) pi (a_l|s_k) q_pi (s_k,a_l) \ 
+$
+
+And like state value , we can also rewrite the equation by matrix-vector form:
+($i=1,2,...,"len"(cal(S)),j=1,2,...,"len"(cal(A))$)
+$ q_pi (s_i,a_j)&=r_pi (s_i,a_j)  + gamma sum _k ^("len"(cal(S))) sum _l ^("len"(cal(A))) p_pi (s_k|s_i,a_j) pi (a_l|s_k) q_pi (s_k,a_l)
+$ 
+
+Notation  some useful notation
+$  P[i,k]&=p_pi (s_k|s_i,a_j) \ 
+[k,l]&=pi (a_l|s_k)q_pi (s_k,a_l) \
+$
+So the action value equation can be rewritten as:
+$  q_pi (s_i ,a_j) = r_pi (s_i,a_j) + gamma sum _k ^("len"(cal(S)))sum _l ^("len"(cal(A))) P[i,k] Q[k,l] $
+
+
 #pagebreak()
 // == environment
 #bibliography(("RL.bib"), title: [
